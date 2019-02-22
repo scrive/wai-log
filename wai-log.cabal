@@ -1,0 +1,37 @@
+name:                wai-log
+version:             0.1.0.0
+
+synopsis:            A logging middleware for WAI applications
+
+description:         A simple logging middleware for WAI applications that
+                     supports the 'log-*' family of packages:
+                     <https://hackage.haskell.org/package/log-base>
+
+category:            Web, Logging
+
+author:              Scrive AB
+copyright:           Scrive AB
+maintainer:          jonathan@scrive.com
+
+license:             BSD3
+license-file:        LICENSE
+
+build-type:          Simple
+cabal-version:       >=2.0
+
+library
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options: -Werror -Wall
+  default-extensions:  OverloadedStrings
+                     , FlexibleContexts
+  ghc-options: -Werror -Wall
+  build-depends:       base >=4.11 && <4.13
+                     , aeson
+                     , http-types
+                     , log-base
+                     , string-conversions
+                     , text
+                     , time
+                     , wai
+  exposed-modules:     Network.Wai.Log
