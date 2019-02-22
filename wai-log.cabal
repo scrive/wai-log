@@ -11,7 +11,9 @@ category:            Web, Logging
 
 author:              Scrive AB
 copyright:           Scrive AB
-maintainer:          jonathan@scrive.com
+maintainer:          Andrzej Rybczak <andrzej@rybczak.net>,
+                     Jonathan Jouty <jonathan@scrive.com>,
+                     Mikhail Glushenkov <mikhail@scrive.com>
 
 license:             BSD3
 license-file:        LICENSE
