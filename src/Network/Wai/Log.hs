@@ -32,14 +32,21 @@ import Data.Aeson ()
 import Data.String.Conversions (ConvertibleStrings, StrictText, cs)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
+import Data.UUID.V4 (nextRandom)
 import Log
 import Network.HTTP.Types.Status
 import Network.Wai
 
 -- | Given a logger, create a 'Middleware' that logs incoming requests, the
 -- response code, and how long it took to process and respond to the request.
+--
+-- Also adds a random (V4) 'UUID' @request-id@ to 'localData'.
 logRequestsWith :: (LogT IO () -> IO ()) -> Middleware
-logRequestsWith runLogger app req respond = do
+logRequestsWith runLogger' app req respond = do
+
+  requestId <- nextRandom
+  let runLogger = runLogger' . localData
+        [ "request-id" .= requestId ]
 
   runLogger . logInfo "Request received" $ object
     [ "method"      .= ts (requestMethod req)
