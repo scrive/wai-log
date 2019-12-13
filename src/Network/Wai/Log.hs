@@ -59,7 +59,7 @@ logRequestsWith runLogger' app req respond = do
 
   app req $ \resp -> do
     tEnd <- getCurrentTime
-    runLogger $ logInfo_ "Sending response"
+    runLogger $ logTrace_ "Sending response"
     r <- respond resp
     tFull <- getCurrentTime
 
