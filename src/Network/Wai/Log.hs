@@ -25,63 +25,29 @@
 -- }
 -- @
 module Network.Wai.Log (
-  logRequestsWith
+-- * Create a Middleware
+  mkApplicationLogger
+, mkApplicationLoggerWith
+-- ** Options
+, module Network.Wai.Log.Options
 ) where
 
-import Data.Aeson ()
-import Data.String.Conversions (ConvertibleStrings, StrictText, cs)
-import Data.Text (Text)
-import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
-import Log
-import Network.HTTP.Types.Status
-import Network.Wai
+import Prelude hiding (log)
 
--- | Given a logger, create a 'Middleware' that logs incoming requests, the
--- response code, and how long it took to process and respond to the request.
-logRequestsWith :: (LogT IO () -> IO ()) -> Middleware
-logRequestsWith runLogger app req respond = do
+import Log (MonadLog, getLoggerIO)
+import Network.Wai (Middleware)
 
-  runLogger $ logRequest req
-  tStart <- getCurrentTime
+import Network.Wai.Log.Internal
+import Network.Wai.Log.Options
 
-  app req $ \resp -> do
-    tEnd <- getCurrentTime
-    runLogger $ logInfo_ "Sending response"
-    r <- respond resp
-    tFull <- getCurrentTime
+-- | Create a logging 'Middleware' using 'defaultOptions'
+--
+-- Use 'mkApplicationLoggerWith' for custom 'Options'
+mkApplicationLogger :: MonadLog m => m Middleware
+mkApplicationLogger = mkApplicationLoggerWith defaultOptions
 
-    runLogger $ logResponseAndCompletionTimes resp tStart tEnd tFull
-
-    return r
-
-logRequest :: MonadLog m => Request -> m ()
-logRequest req = logInfo "Request received" $ object
-  [ "method"      .= ts (requestMethod req)
-  , "url"         .= ts (rawPathInfo req)
-  , "remote-host" .= show (remoteHost req)
-  , "user-agent"  .= fmap ts (requestHeaderUserAgent req)
-  , "body-length" .= show (requestBodyLength req)
-  ]
-
-logResponseAndCompletionTimes
-  :: MonadLog m
-  => Response
-  -> UTCTime -- ^ Start time
-  -> UTCTime -- ^ Processing end time
-  -> UTCTime -- ^ Full end time
-  -> m ()
-logResponseAndCompletionTimes resp tStart tEnd tFull =
-  logInfo "Request complete" $ object
-    [ "status" .= object [ "code"    .= statusCode (responseStatus resp)
-                         , "message" .= ts (statusMessage (responseStatus resp))
-                         ]
-    , "time"   .= object [ "full"    .= diffSeconds tFull tStart
-                         , "process" .= diffSeconds tEnd tStart
-                         ]
-    ]
-
-diffSeconds :: UTCTime -> UTCTime -> Double
-diffSeconds a b = realToFrac $ diffUTCTime a b
-
-ts :: ConvertibleStrings a StrictText => a -> Text
-ts = cs
+-- | Create a logging 'Middleware' using the supplied 'Options'
+mkApplicationLoggerWith :: MonadLog m => Options -> m Middleware
+mkApplicationLoggerWith options = do
+  logIO <- getLoggerIO
+  return $ logRequestsWith logIO options
