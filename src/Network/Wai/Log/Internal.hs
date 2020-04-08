@@ -24,8 +24,8 @@ logRequestsWith loggerIO Options{..} app req respond = do
          logIO_ "Sending response"
     r <- respond resp
     tFull <- getCurrentTime
-    let processing = diffUTCTime tStart tEnd
-        full       = diffUTCTime tStart tFull
+    let processing = diffUTCTime tEnd  tStart
+        full       = diffUTCTime tFull tStart
         times      = ResponseTime{..}
     logIO "Request complete" . object $ logResponse resp times
     return r
