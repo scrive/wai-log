@@ -4,11 +4,11 @@ module Network.Wai.Log.Internal where
 import Control.Monad (when)
 import Data.Aeson.Types (Value, object, emptyObject)
 import Data.Text (Text)
-import Data.Time.Clock (UTCTime, getCurrentTime)
+import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import Log (LogLevel)
 import Network.Wai (Middleware)
 
-import Network.Wai.Log.Options (Options(..))
+import Network.Wai.Log.Options (Options(..), ResponseTime(..))
 
 -- | This type matches the one returned by 'getLoggerIO'
 type LoggerIO = UTCTime -> LogLevel -> Text -> Value -> IO ()
@@ -24,8 +24,10 @@ logRequestsWith loggerIO Options{..} app req respond = do
          logIO_ "Sending response"
     r <- respond resp
     tFull <- getCurrentTime
-    logIO "Request complete" . object $
-      logResponse resp tStart tEnd tFull
+    let processing = diffUTCTime tStart tEnd
+        full       = diffUTCTime tStart tFull
+        times      = ResponseTime{..}
+    logIO "Request complete" . object $ logResponse resp times
     return r
 
   where

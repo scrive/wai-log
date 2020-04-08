@@ -1,6 +1,7 @@
 module Network.Wai.Log.Options (
--- * Options
+-- * Options & Timing
   Options(..)
+, ResponseTime(..)
 -- * Defaults
 , defaultOptions
 , defaultLogRequest
@@ -10,7 +11,7 @@ module Network.Wai.Log.Options (
 import Data.Aeson.Types (Pair)
 import Data.String.Conversions (ConvertibleStrings, StrictText, cs)
 import Data.Text (Text)
-import Data.Time.Clock (UTCTime, diffUTCTime)
+import Data.Time.Clock (NominalDiffTime)
 import Log
 import Network.HTTP.Types.Status
 import Network.Wai
@@ -20,9 +21,15 @@ data Options = Options {
     logLevel            :: LogLevel
   , logRequest          :: Request -> [Pair]
   , logSendingResponse  :: Bool
-  -- | The 'UTCTime' values in order are : start, end, full
-  , logResponse         :: Response -> UTCTime -> UTCTime -> UTCTime -> [Pair]
-  -- FIXME: ^ create custom 'Timings' type instead of this "mess"
+  , logResponse         :: Response -> ResponseTime -> [Pair]
+  }
+
+-- | Timing data
+data ResponseTime = ResponseTime {
+  -- | Time between request received and application finished processing request
+    processing :: NominalDiffTime
+  -- | Time between request received and response sent
+  , full       :: NominalDiffTime
   }
 
 -- | Default 'Options'
@@ -58,29 +65,23 @@ defaultLogRequest req =
   , "body-length" .= show (requestBodyLength req)
   ]
 
--- | Logs the following values for the response:
+-- | Logs the following values:
 --
 -- * status code
 -- * status message
+-- * time full
+-- * time processing
 --
--- Also logs the "process" and "full" time
-defaultLogResponse
-  :: Response
-  -> UTCTime -- ^ Start time
-  -> UTCTime -- ^ Processing end time
-  -> UTCTime -- ^ Full end time
-  -> [Pair]
-defaultLogResponse resp tStart tEnd tFull =
+-- Time is in seconds as that is how 'NominalDiffTime' is treated by default
+defaultLogResponse :: Response -> ResponseTime -> [Pair]
+defaultLogResponse resp time =
     [ "status" .= object [ "code"    .= statusCode (responseStatus resp)
                          , "message" .= ts (statusMessage (responseStatus resp))
                          ]
-    , "time"   .= object [ "full"    .= diffSeconds tFull tStart
-                         , "process" .= diffSeconds tEnd tStart
+    , "time"   .= object [ "full"       .= full time
+                         , "processing" .= processing time
                          ]
     ]
-
-diffSeconds :: UTCTime -> UTCTime -> Double
-diffSeconds a b = realToFrac $ diffUTCTime a b
 
 ts :: ConvertibleStrings a StrictText => a -> Text
 ts = cs
