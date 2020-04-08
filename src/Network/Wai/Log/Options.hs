@@ -1,8 +1,9 @@
 module Network.Wai.Log.Options (
+-- * Options
   Options(..)
+-- * Defaults
 , defaultOptions
--- * TODO
-, defaultLogRquest
+, defaultLogRequest
 , defaultLogResponse
 ) where
 
@@ -27,28 +28,29 @@ data Options = Options {
 -- | Default 'Options'
 --
 -- @
--- { logLevel = LogInfo
--- , logRequest = defaultLogRquest
+-- { logLevel = 'LogInfo'
+-- , logRequest = 'defaultLogRequest'
 -- , logSendingResponse = True
--- , logResponse = defaultLogResponse
+-- , logResponse = 'defaultLogResponse'
 -- }
 -- @
 defaultOptions :: Options
 defaultOptions = Options
   { logLevel = LogInfo
-  , logRequest = defaultLogRquest
+  , logRequest = defaultLogRequest
   , logSendingResponse = True
   , logResponse = defaultLogResponse
   }
 
 -- | Logs the following request values:
+--
 -- * method
 -- * url path
 -- * remote host
 -- * user agent
 -- * body-length
-defaultLogRquest :: Request -> [Pair]
-defaultLogRquest req =
+defaultLogRequest :: Request -> [Pair]
+defaultLogRequest req =
   [ "method"      .= ts (requestMethod req)
   , "url"         .= ts (rawPathInfo req)
   , "remote-host" .= show (remoteHost req)
@@ -57,6 +59,7 @@ defaultLogRquest req =
   ]
 
 -- | Logs the following values for the response:
+--
 -- * status code
 -- * status message
 --

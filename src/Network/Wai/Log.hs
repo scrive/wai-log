@@ -1,8 +1,7 @@
 -- | A simple logging middleware for WAI applications that supports the 'log-*'
 -- family of packages: <https://hackage.haskell.org/package/log-base>
 --
--- Currently there are no logging options but contributions are welcome.
--- When logging to @stdout@, the output looks like this:
+-- When logging to @stdout@ using 'defaultOptions', the output looks like this:
 --
 -- @
 -- 2019-02-21 19:51:47 INFO my-server: Request received {
@@ -29,7 +28,8 @@ module Network.Wai.Log (
   mkApplicationLogger
 , mkApplicationLoggerWith
 -- ** Options
-, module Network.Wai.Log.Options
+, Options(..)
+, defaultOptions
 ) where
 
 import Prelude hiding (log)
