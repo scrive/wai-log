@@ -78,8 +78,8 @@ defaultLogResponse resp time =
     [ "status" .= object [ "code"    .= statusCode (responseStatus resp)
                          , "message" .= ts (statusMessage (responseStatus resp))
                          ]
-    , "time"   .= object [ "full"       .= full time
-                         , "processing" .= processing time
+    , "time"   .= object [ "full"    .= full time
+                         , "process" .= processing time
                          ]
     ]
 
