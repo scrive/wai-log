@@ -21,7 +21,7 @@ data Options = Options {
     logLevel            :: LogLevel
   , logRequest          :: Request -> [Pair]
   , logSendingResponse  :: Bool
-  , logResponse         :: Response -> ResponseTime -> [Pair]
+  , logResponse         :: Request -> Response -> ResponseTime -> [Pair]
   }
 
 -- | Timing data
@@ -72,9 +72,11 @@ defaultLogRequest req =
 -- * time full
 -- * time processing
 --
+-- Nothing from the 'Request' is logged
+--
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
-defaultLogResponse :: Response -> ResponseTime -> [Pair]
-defaultLogResponse resp time =
+defaultLogResponse :: Request -> Response -> ResponseTime -> [Pair]
+defaultLogResponse _req resp time =
     [ "status" .= object [ "code"    .= statusCode (responseStatus resp)
                          , "message" .= ts (statusMessage (responseStatus resp))
                          ]

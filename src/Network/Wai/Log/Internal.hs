@@ -27,7 +27,7 @@ logRequestsWith loggerIO Options{..} app req respond = do
     let processing = diffUTCTime tEnd  tStart
         full       = diffUTCTime tFull tStart
         times      = ResponseTime{..}
-    logIO "Request complete" . object $ logResponse resp times
+    logIO "Request complete" . object $ logResponse req resp times
     return r
 
   where
