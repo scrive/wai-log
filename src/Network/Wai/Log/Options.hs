@@ -21,7 +21,7 @@ import Network.Wai
 data Options = Options {
     logLevel            :: LogLevel
   , logRequest          :: UUID -> Request -> [Pair]
-  , logSendingResponse  :: Bool
+  , logSendingResponse  :: Maybe (UUID -> [Pair])
   , logResponse         :: UUID -> Request -> Response -> ResponseTime -> [Pair]
   }
 
@@ -46,7 +46,7 @@ defaultOptions :: Options
 defaultOptions = Options
   { logLevel = LogInfo
   , logRequest = defaultLogRequest
-  , logSendingResponse = True
+  , logSendingResponse = Just defaultLogSendingResponse
   , logResponse = defaultLogResponse
   }
 
@@ -66,6 +66,10 @@ defaultLogRequest uuid req =
   , "user-agent"   .= fmap ts (requestHeaderUserAgent req)
   , "body-length"  .= show (requestBodyLength req)
   ]
+
+defaultLogSendingResponse :: UUID -> [Pair]
+defaultLogSendingResponse uuid =
+  [ "request_uuid" .= uuid ]
 
 -- | Logs the following values:
 --

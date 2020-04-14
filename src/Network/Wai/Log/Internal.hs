@@ -1,8 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Network.Wai.Log.Internal where
 
-import Control.Monad (when)
-import Data.Aeson.Types (Value, object, emptyObject)
+import Data.Aeson.Types (Value, object)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import Data.UUID.V4 (nextRandom)
@@ -22,8 +21,9 @@ logRequestsWith loggerIO Options{..} app req respond = do
   tStart <- getCurrentTime
   app req $ \resp -> do
     tEnd <- getCurrentTime
-    when logSendingResponse $
-         logIO_ "Sending response"
+    case logSendingResponse of
+      Nothing -> return ()
+      Just logSR -> logIO "Sending response" . object . logSR $ uuid
     r <- respond resp
     tFull <- getCurrentTime
     let processing = diffUTCTime tEnd  tStart
@@ -37,5 +37,3 @@ logRequestsWith loggerIO Options{..} app req respond = do
     logIO message value = do
       now <- getCurrentTime
       loggerIO now logLevel message value
-
-    logIO_ m = logIO m emptyObject
