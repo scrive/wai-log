@@ -1,4 +1,4 @@
-# wai-log-0.2 (not released)
+# wai-log-0.2 (2020-04-14)
 
 * Entire interface has changed: now builds a `Middleware` in a `MonadLog`
   context
