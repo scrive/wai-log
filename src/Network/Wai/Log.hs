@@ -28,8 +28,10 @@
 -- @
 module Network.Wai.Log (
 -- * Create a Middleware
-  mkApplicationLogger
-, mkApplicationLoggerWith
+  mkLogMiddleware
+, mkLogMiddlewareWith
+-- ** Type
+, LogMiddleware
 -- ** Options
 , Options(..)
 , defaultOptions
@@ -37,20 +39,29 @@ module Network.Wai.Log (
 
 import Prelude hiding (log)
 
+import Data.UUID (UUID)
 import Log (MonadLog, getLoggerIO)
-import Network.Wai (Middleware)
+import Network.Wai
 
 import Network.Wai.Log.Internal
 import Network.Wai.Log.Options
 
--- | Create a logging 'Middleware' using 'defaultOptions'
+-- | The classic @wai@ 'Middleware' type is @Application -> Application@, but
+-- that does not work when you want to pass logging context down to the
+-- 'Application'.
+--
+-- Instead we pass a 'UUID' to the 'Application', containting the
+-- @request_uuid@, so it can be logged in the application's context.
+type LogMiddleware = (UUID -> Application) -> Application
+
+-- | Create a 'LogMiddleware' using 'defaultOptions'
 --
 -- Use 'mkApplicationLoggerWith' for custom 'Options'
-mkApplicationLogger :: MonadLog m => m Middleware
-mkApplicationLogger = mkApplicationLoggerWith defaultOptions
+mkLogMiddleware :: MonadLog m => m LogMiddleware
+mkLogMiddleware = mkLogMiddlewareWith defaultOptions
 
--- | Create a logging 'Middleware' using the supplied 'Options'
-mkApplicationLoggerWith :: MonadLog m => Options -> m Middleware
-mkApplicationLoggerWith options = do
-  logIO <- getLoggerIO
-  return $ logRequestsWith logIO options
+-- | Create a 'LogMiddleware' using the supplied 'Options'
+mkLogMiddlewareWith :: MonadLog m => Options -> m LogMiddleware
+mkLogMiddlewareWith options = do
+  loggerIO <- getLoggerIO
+  return $ logRequestsWith loggerIO options
