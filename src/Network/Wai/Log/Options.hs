@@ -12,6 +12,7 @@ import Data.Aeson.Types (Pair)
 import Data.String.Conversions (ConvertibleStrings, StrictText, cs)
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
+import Data.UUID (UUID)
 import Log
 import Network.HTTP.Types.Status
 import Network.Wai
@@ -19,9 +20,9 @@ import Network.Wai
 -- | Logging options
 data Options = Options {
     logLevel            :: LogLevel
-  , logRequest          :: Request -> [Pair]
+  , logRequest          :: UUID -> Request -> [Pair]
   , logSendingResponse  :: Bool
-  , logResponse         :: Request -> Response -> ResponseTime -> [Pair]
+  , logResponse         :: UUID -> Request -> Response -> ResponseTime -> [Pair]
   }
 
 -- | Timing data
@@ -56,13 +57,14 @@ defaultOptions = Options
 -- * remote host
 -- * user agent
 -- * body-length
-defaultLogRequest :: Request -> [Pair]
-defaultLogRequest req =
-  [ "method"      .= ts (requestMethod req)
-  , "url"         .= ts (rawPathInfo req)
-  , "remote-host" .= show (remoteHost req)
-  , "user-agent"  .= fmap ts (requestHeaderUserAgent req)
-  , "body-length" .= show (requestBodyLength req)
+defaultLogRequest :: UUID -> Request -> [Pair]
+defaultLogRequest uuid req =
+  [ "request_uuid" .= uuid
+  , "method"       .= ts (requestMethod req)
+  , "url"          .= ts (rawPathInfo req)
+  , "remote-host"  .= show (remoteHost req)
+  , "user-agent"   .= fmap ts (requestHeaderUserAgent req)
+  , "body-length"  .= show (requestBodyLength req)
   ]
 
 -- | Logs the following values:
@@ -75,9 +77,10 @@ defaultLogRequest req =
 -- Nothing from the 'Request' is logged
 --
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
-defaultLogResponse :: Request -> Response -> ResponseTime -> [Pair]
-defaultLogResponse _req resp time =
-    [ "status" .= object [ "code"    .= statusCode (responseStatus resp)
+defaultLogResponse :: UUID -> Request -> Response -> ResponseTime -> [Pair]
+defaultLogResponse uuid _req resp time =
+    [ "request_uuid" .= uuid
+    , "status" .= object [ "code"    .= statusCode (responseStatus resp)
                          , "message" .= ts (statusMessage (responseStatus resp))
                          ]
     , "time"   .= object [ "full"    .= full time

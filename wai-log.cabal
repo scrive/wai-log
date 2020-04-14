@@ -43,6 +43,7 @@ library
                      , string-conversions
                      , text
                      , time
+                     , uuid
                      , wai
   exposed-modules:     Network.Wai.Log
                      , Network.Wai.Log.Options

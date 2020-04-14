@@ -1,6 +1,9 @@
 -- | A simple logging middleware for WAI applications that supports the 'log-*'
 -- family of packages: <https://hackage.haskell.org/package/log-base>
 --
+-- FIXME
+-- The example below is not accurate anymore, needs to be updated...
+--
 -- When logging to @stdout@ using 'defaultOptions', the output looks like this:
 --
 -- @
