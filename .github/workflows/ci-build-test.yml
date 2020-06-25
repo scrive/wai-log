@@ -19,6 +19,13 @@ jobs:
           - 8.4.4
           - 8.6.5
           - 8.8.3
+        experimental: [false]
+        include:
+          - os: ubuntu-latest
+            ghc: 8.10
+            experimental: true
+
+    continue-on-error: ${{ matrix.experimental }}
 
     runs-on: ${{ matrix.os }}
 
