@@ -1,0 +1,57 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        ghc:
+          - '7.10.3'
+          - '8.0.2'
+          - '8.2.2'
+          - '8.4.4'
+          - '8.6.5'
+          - '8.8.3'
+        experimental: [false]
+        include:
+          - os: ubuntu-latest
+            ghc: '8.10'
+            experimental: true
+
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    name: GHC ${{ matrix.ghc }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-haskell@v1
+      with:
+        ghc-version: ${{ matrix.ghc }}
+        cabal-version: '3.0'
+
+    - name: Cache
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-cabal
+      with:
+        path: ~/.cabal
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-GHC-${{ matrix.ghc }}-${{ hashFiles('**/*.cabal') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-GHC-${{ matrix.ghc }}-
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+
+    - name: Install dependencies
+      run: |
+        cabal update
+        cabal build --only-dependencies --enable-tests --enable-benchmarks
+    - name: Build
+      run: cabal build --enable-tests --enable-benchmarks all
+    - name: Run tests
+      run: cabal test all
