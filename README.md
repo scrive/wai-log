@@ -1,4 +1,5 @@
-# wai-log [![Hackage version](https://img.shields.io/hackage/v/wai-log.svg?label=Hackage)](https://hackage.haskell.org/package/wai-log) [![Build Status](https://secure.travis-ci.org/scrive/wai-log.svg?branch=master)](http://travis-ci.org/scrive/wai-log)
+# wai-log [![Hackage version](https://img.shields.io/hackage/v/wai-log.svg?label=Hackage)](https://hackage.haskell.org/package/wai-log)
+![Build & Test](https://github.com/scrive/wai-log/workflows/Build%20&%20Test/badge.svg)
 
 A simple logging middleware for WAI applications that supports the `log-*`
 family of packages.

@@ -1,9 +1,11 @@
-# wai-log-0.3 (TODO)
+# wai-log-0.3 (2020-10-27)
 
 * Rename `mkApplicationLogger` into `mkLogMiddleware`
 * Generate ID for each request to correlate log messages
 * Instead of logging three events: `Request received`, `Sending response` and
   `Request complete`, only log two of them: the first and the third one.
+* Log `method` and `url` in `Request complete` too
+* Log `response_body` on 4xx and 5xx
 
 # wai-log-0.2 (2020-04-14)
 
