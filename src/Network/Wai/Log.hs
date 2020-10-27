@@ -1,29 +1,30 @@
 -- | A simple logging middleware for WAI applications that supports the 'log-*'
 -- family of packages: <https://hackage.haskell.org/package/log-base>
 --
--- FIXME
--- The example below is not accurate anymore, needs to be updated...
---
 -- When logging to @stdout@ using 'defaultOptions', the output looks like this:
 --
 -- @
--- 2019-02-21 19:51:47 INFO my-server: Request received {
---   \"url\": \"\/api\/myapi\",
---   \"body-length\": \"KnownLength 0\",
---   \"method\": \"GET\",
---   \"user-agent\": \"curl\/7.54.0\",
---   \"remote-host\": \"127.0.0.1:61249\"
+-- 2020-10-27 09:37:31 INFO eid-server: Request received {
+--   "url": "\/api\/myapi",
+--   "body-length": "KnownLength 0",
+--   "method": "GET",
+--   "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0",
+--   "request_uuid": "9f86d3dd-026a-4a6d-801e-d466440819e1",
+--   "remote-host": "127.0.0.1:33178"
 -- }
--- 2019-02-21 19:51:47 INFO my-server: Sending response
--- 2019-02-21 19:51:47 INFO my-server: Request complete {
---   \"status\": {
---     \"code\": 200,
---     \"message\": \"OK\"
+-- 2020-10-27 09:37:31 INFO eid-server: Sending response {
+--   "request_uuid": "9f86d3dd-026a-4a6d-801e-d466440819e1"
+-- }
+-- 2020-10-27 09:37:31 INFO eid-server: Request complete {
+--   "status": {
+--     "code": 200,
+--     "message": "OK"
 --   },
---   \"time\": {
---     \"process\": 2.224e-3,
---     \"full\": 2.348e-3
---   }
+--   "time": {
+--     "process": 4.504112e-3,
+--     "full": 4.619166e-3
+--   },
+--   "request_uuid": "9f86d3dd-026a-4a6d-801e-d466440819e1"
 -- }
 -- @
 module Network.Wai.Log (
