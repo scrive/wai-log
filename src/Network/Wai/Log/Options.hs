@@ -19,9 +19,9 @@ import Network.Wai
 
 -- | Logging options
 data Options = Options {
-    logLevel            :: LogLevel
-  , logRequest          :: UUID -> Request -> [Pair]
-  , logResponse         :: UUID -> Request -> Response -> ResponseTime -> [Pair]
+    logLevel    :: LogLevel
+  , logRequest  :: UUID -> Request -> [Pair]
+  , logResponse :: UUID -> Request -> Response -> Maybe Text -> ResponseTime -> [Pair]
   }
 
 -- | Timing data
@@ -75,9 +75,10 @@ defaultLogRequest uuid req =
 -- Nothing from the 'Request' is logged
 --
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
-defaultLogResponse :: UUID -> Request -> Response -> ResponseTime -> [Pair]
-defaultLogResponse uuid _req resp time =
-    [ "request_uuid" .= uuid
+defaultLogResponse :: UUID -> Request -> Response -> Maybe Text -> ResponseTime -> [Pair]
+defaultLogResponse uuid _req resp responseBody time =
+    [ "request_uuid"  .= uuid
+    , "response_body" .= responseBody
     , "status" .= object [ "code"    .= statusCode (responseStatus resp)
                          , "message" .= ts (statusMessage (responseStatus resp))
                          ]

@@ -38,6 +38,7 @@ library
                      , FlexibleContexts
   build-depends:       base >=4.8 && <5
                      , aeson
+                     , bytestring
                      , http-types
                      , log-base
                      , string-conversions

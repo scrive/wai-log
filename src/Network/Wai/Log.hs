@@ -4,26 +4,28 @@
 -- When logging to @stdout@ using 'defaultOptions', the output looks like this:
 --
 -- @
--- 2020-10-27 09:37:31 INFO eid-server: Request received {
---   "url": "\/api\/myapi",
---   "body-length": "KnownLength 0",
---   "method": "GET",
---   "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0",
---   "request_uuid": "9f86d3dd-026a-4a6d-801e-d466440819e1",
---   "remote-host": "127.0.0.1:33178"
+-- 2020-10-27 12:30:23 INFO eid-server: Request received {
+--   "url": "\/api\/v1\/transaction\/new",
+--   "body-length": "KnownLength 136",
+--   "method": "POST",
+--   "user-agent": "curl/7.68.0",
+--   "request_uuid": "f2c89425-9ec4-4cd2-ae56-4bab23681fce",
+--   "remote-host": "127.0.0.1:34694"
 -- }
--- 2020-10-27 09:37:31 INFO eid-server: Request complete {
+-- 2020-10-27 12:30:23 INFO eid-server: Request complete {
+--   "response_body": "Error in $: Error in $.providerParameters.seBankID.personalNumber: invalid format for SE personal number: 123",
 --   "status": {
---     "code": 200,
---     "message": "OK"
+--     "code": 400,
+--     "message": "Bad Request"
 --   },
 --   "time": {
---     "process": 4.504112e-3,
---     "full": 4.619166e-3
+--     "process": 2.97493e-3,
+--     "full": 3.159565e-3
 --   },
---   "request_uuid": "9f86d3dd-026a-4a6d-801e-d466440819e1"
+--   "request_uuid": "f2c89425-9ec4-4cd2-ae56-4bab23681fce"
 -- }
 -- @
+
 module Network.Wai.Log (
 -- * Create a Middleware
   mkLogMiddleware
