@@ -21,9 +21,6 @@ logRequestsWith loggerIO Options{..} mkApp req respond = do
   tStart <- getCurrentTime
   (mkApp uuid) req $ \resp -> do
     tEnd <- getCurrentTime
-    case logSendingResponse of
-      Nothing -> return ()
-      Just logSR -> logIO "Sending response" . logSR $ uuid
     r <- respond resp
     tFull <- getCurrentTime
     let processing = diffUTCTime tEnd  tStart

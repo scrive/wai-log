@@ -12,9 +12,6 @@
 --   "request_uuid": "9f86d3dd-026a-4a6d-801e-d466440819e1",
 --   "remote-host": "127.0.0.1:33178"
 -- }
--- 2020-10-27 09:37:31 INFO eid-server: Sending response {
---   "request_uuid": "9f86d3dd-026a-4a6d-801e-d466440819e1"
--- }
 -- 2020-10-27 09:37:31 INFO eid-server: Request complete {
 --   "status": {
 --     "code": 200,

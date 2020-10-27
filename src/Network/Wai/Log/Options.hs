@@ -21,7 +21,6 @@ import Network.Wai
 data Options = Options {
     logLevel            :: LogLevel
   , logRequest          :: UUID -> Request -> [Pair]
-  , logSendingResponse  :: Maybe (UUID -> [Pair])
   , logResponse         :: UUID -> Request -> Response -> ResponseTime -> [Pair]
   }
 
@@ -38,7 +37,6 @@ data ResponseTime = ResponseTime {
 -- @
 -- { logLevel = 'LogInfo'
 -- , logRequest = 'defaultLogRequest'
--- , logSendingResponse = True
 -- , logResponse = 'defaultLogResponse'
 -- }
 -- @
@@ -46,7 +44,6 @@ defaultOptions :: Options
 defaultOptions = Options
   { logLevel = LogInfo
   , logRequest = defaultLogRequest
-  , logSendingResponse = Just defaultLogSendingResponse
   , logResponse = defaultLogResponse
   }
 
@@ -67,9 +64,6 @@ defaultLogRequest uuid req =
   , "body-length"  .= show (requestBodyLength req)
   ]
 
-defaultLogSendingResponse :: UUID -> [Pair]
-defaultLogSendingResponse uuid =
-  [ "request_uuid" .= uuid ]
 
 -- | Logs the following values:
 --
