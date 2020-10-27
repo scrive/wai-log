@@ -76,8 +76,10 @@ defaultLogRequest uuid req =
 --
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
 defaultLogResponse :: UUID -> Request -> Response -> Maybe Text -> ResponseTime -> [Pair]
-defaultLogResponse uuid _req resp responseBody time =
+defaultLogResponse uuid req resp responseBody time =
     [ "request_uuid"  .= uuid
+    , "method"        .= ts (requestMethod req)
+    , "url"           .= ts (rawPathInfo req)
     , "response_body" .= responseBody
     , "status" .= object [ "code"    .= statusCode (responseStatus resp)
                          , "message" .= ts (statusMessage (responseStatus resp))
