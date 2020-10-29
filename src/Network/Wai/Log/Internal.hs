@@ -1,17 +1,14 @@
 {-# LANGUAGE RecordWildCards #-}
 module Network.Wai.Log.Internal where
 
-import Data.Aeson.Types (Value, object)
-import Data.ByteString.Builder (Builder, toLazyByteString)
+import Data.Aeson.Types (Value(..), object)
+import Data.ByteString.Builder (Builder)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
 import Log (LogLevel)
-import Network.HTTP.Types.Status (statusIsClientError, statusIsServerError)
 import Network.Wai (Application, responseToStream)
-import qualified Data.ByteString.Lazy as BSL
-import qualified Data.Text.Encoding as T
 
 import Network.Wai.Log.Options (Options(..), ResponseTime(..), logSendingResponse)
 
@@ -34,19 +31,20 @@ logRequestsWith loggerIO Options{..} mkApp req respond = do
         full       = diffUTCTime tFull tStart
         times      = ResponseTime{..}
 
-    let (status, _headers, bodyToIO) = responseToStream resp
-    _ <- if statusIsClientError status || statusIsServerError status
-      then
+    _ <- case logBody of
+      Nothing ->
+        logIO "Request complete" $ logResponse uuid req resp Null times
+      Just constructBodyToLog -> do
+        let (status, _headers, bodyToIO) = responseToStream resp
         bodyToIO $ \streamingBody ->
-          let builderToText :: Builder -> Text
-              builderToText b = T.decodeUtf8 $ BSL.toStrict $ toLazyByteString b
-              logWithBuilder :: Builder -> IO ()
-              logWithBuilder b =
-                let body = Just $ builderToText b
-                in logIO "Request complete" $ logResponse uuid req resp body times
-          in streamingBody logWithBuilder (return ())
-      else
-        logIO "Request complete" $ logResponse uuid req resp Nothing times
+              let bodyValue :: Builder -> Value
+                  bodyValue = constructBodyToLog status
+
+                  logWithBuilder :: Builder -> IO ()
+                  logWithBuilder b = logIO "Request complete" $
+                    logResponse uuid req resp (bodyValue b) times
+
+              in streamingBody logWithBuilder (return ())
     return r
 
   where

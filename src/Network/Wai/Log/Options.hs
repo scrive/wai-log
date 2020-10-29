@@ -9,7 +9,8 @@ module Network.Wai.Log.Options (
 , defaultLogResponse
 ) where
 
-import Data.Aeson.Types (Pair)
+import Data.Aeson.Types (Pair, Value)
+import Data.ByteString.Builder (Builder)
 import Data.String.Conversions (ConvertibleStrings, StrictText, cs)
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
@@ -22,7 +23,8 @@ import Network.Wai
 data Options = Options {
     logLevel    :: LogLevel
   , logRequest  :: UUID -> Request -> [Pair]
-  , logResponse :: UUID -> Request -> Response -> Maybe Text -> ResponseTime -> [Pair]
+  , logResponse :: UUID -> Request -> Response -> Value -> ResponseTime -> [Pair]
+  , logBody     :: Maybe (Status -> Builder -> Value)
   }
 
 -- | Timing data
@@ -46,6 +48,7 @@ defaultOptions = Options
   { logLevel = LogInfo
   , logRequest = defaultLogRequest
   , logResponse = defaultLogResponse
+  , logBody = Nothing
   }
 
 -- | Logs the following request values:
@@ -85,7 +88,7 @@ logSendingResponse uuid =
 -- * time processing
 --
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
-defaultLogResponse :: UUID -> Request -> Response -> Maybe Text -> ResponseTime -> [Pair]
+defaultLogResponse :: UUID -> Request -> Response -> Value -> ResponseTime -> [Pair]
 defaultLogResponse uuid req resp responseBody time =
     [ "request_uuid"  .= uuid
     , "method"        .= ts (requestMethod req)
