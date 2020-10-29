@@ -12,6 +12,9 @@
 --   "request_uuid": "f2c89425-9ec4-4cd2-ae56-4bab23681fce",
 --   "remote-host": "127.0.0.1:34694"
 -- }
+-- 2020-10-27 09:37:31 INFO eid-server: Sending response {
+--   "request_uuid": "f2c89425-9ec4-4cd2-ae56-4bab23681fce"
+-- }
 -- 2020-10-27 12:30:23 INFO eid-server: Request complete {
 --   "response_body": "Error in $: Error in $.providerParameters.seBankID.personalNumber: invalid format for SE personal number: 123",
 --   "status": {

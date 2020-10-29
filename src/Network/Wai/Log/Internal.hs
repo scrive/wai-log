@@ -13,7 +13,7 @@ import Network.Wai (Application, responseToStream)
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text.Encoding as T
 
-import Network.Wai.Log.Options (Options(..), ResponseTime(..))
+import Network.Wai.Log.Options (Options(..), ResponseTime(..), logSendingResponse)
 
 -- | This type matches the one returned by 'getLoggerIO'
 type LoggerIO = UTCTime -> LogLevel -> Text -> Value -> IO ()
@@ -25,6 +25,7 @@ logRequestsWith loggerIO Options{..} mkApp req respond = do
   tStart <- getCurrentTime
   mkApp uuid req $ \resp -> do
     tEnd <- getCurrentTime
+    logIO "Sending response" . logSendingResponse $ uuid
     r <- respond resp
     tFull <- getCurrentTime
     let processing = diffUTCTime tEnd  tStart

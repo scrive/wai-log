@@ -2,8 +2,7 @@
 
 * Rename `mkApplicationLogger` into `mkLogMiddleware`
 * Generate ID for each request to correlate log messages
-* Instead of logging three events: `Request received`, `Sending response` and
-  `Request complete`, only log two of them: the first and the third one.
+* Remove optional `logSendingResponse`, which means always logging `Sending response`
 * Log `method` and `url` in `Request complete` too
 * Log `response_body` on 4xx and 5xx
 
