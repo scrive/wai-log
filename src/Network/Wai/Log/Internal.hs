@@ -18,6 +18,8 @@ import Network.Wai.Log.Options (Options(..), ResponseTime(..), logSendingRespons
 -- | This type matches the one returned by 'getLoggerIO'
 type LoggerIO = UTCTime -> LogLevel -> Text -> Value -> IO ()
 
+-- | Create a logging 'Middleware' that takes request UUID
+-- given a 'LoggerIO' logging function and 'Options'
 logRequestsWith :: LoggerIO -> Options -> (UUID -> Application) -> Application
 logRequestsWith loggerIO Options{..} mkApp req respond = do
   uuid <- nextRandom

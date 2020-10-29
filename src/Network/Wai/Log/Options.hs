@@ -50,6 +50,7 @@ defaultOptions = Options
 
 -- | Logs the following request values:
 --
+-- * request_uuid
 -- * method
 -- * url path
 -- * remote host
@@ -65,18 +66,23 @@ defaultLogRequest uuid req =
   , "body-length"  .= show (requestBodyLength req)
   ]
 
+-- | Logs the following values:
+--
+-- * request_uuid
 logSendingResponse :: UUID -> [Pair]
 logSendingResponse uuid =
   [ "request_uuid" .= uuid ]
 
 -- | Logs the following values:
 --
+-- * request_uuid
+-- * request method
+-- * request url path
+-- * response_body
 -- * status code
 -- * status message
 -- * time full
 -- * time processing
---
--- Nothing from the 'Request' is logged
 --
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
 defaultLogResponse :: UUID -> Request -> Response -> Maybe Text -> ResponseTime -> [Pair]

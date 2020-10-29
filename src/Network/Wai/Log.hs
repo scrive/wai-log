@@ -17,6 +17,8 @@
 -- }
 -- 2020-10-27 12:30:23 INFO eid-server: Request complete {
 --   "response_body": "Error in $: Error in $.providerParameters.seBankID.personalNumber: invalid format for SE personal number: 123",
+--   "url": "\/api\/v1\/transaction\/new",
+--   "method": "POST",
 --   "status": {
 --     "code": 400,
 --     "message": "Bad Request"
