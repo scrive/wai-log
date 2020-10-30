@@ -34,17 +34,20 @@ logRequestsWith loggerIO Options{..} mkApp req respond = do
     _ <- case logBody of
       Nothing ->
         logIO "Request complete" $ logResponse uuid req resp Null times
-      Just constructBodyToLog -> do
-        let (status, _headers, bodyToIO) = responseToStream resp
-        bodyToIO $ \streamingBody ->
-              let bodyValue :: Builder -> Value
-                  bodyValue = constructBodyToLog status
-
-                  logWithBuilder :: Builder -> IO ()
+      Just bodyLogValueConstructorFunction ->
+        let (status, responseHeaders, bodyToIO) = responseToStream resp
+            mBodyLogValueConstructor =
+              bodyLogValueConstructorFunction req status responseHeaders
+        in case mBodyLogValueConstructor of
+          Nothing ->
+            logIO "Request complete" $ logResponse uuid req resp Null times
+          Just bodyLogValueConstructor ->
+            bodyToIO $ \streamingBodyToIO ->
+              let logWithBuilder :: Builder -> IO ()
                   logWithBuilder b = logIO "Request complete" $
-                    logResponse uuid req resp (bodyValue b) times
+                    logResponse uuid req resp (bodyLogValueConstructor b) times
 
-              in streamingBody logWithBuilder (return ())
+              in streamingBodyToIO logWithBuilder (return ())
     return r
 
   where

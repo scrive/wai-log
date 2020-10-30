@@ -16,7 +16,8 @@ import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
 import Data.UUID (UUID)
 import Log
-import Network.HTTP.Types.Status
+import Network.HTTP.Types.Header (ResponseHeaders)
+import Network.HTTP.Types.Status (Status, statusCode, statusMessage)
 import Network.Wai
 
 -- | Logging options
@@ -24,7 +25,15 @@ data Options = Options {
     logLevel    :: LogLevel
   , logRequest  :: UUID -> Request -> [Pair]
   , logResponse :: UUID -> Request -> Response -> Value -> ResponseTime -> [Pair]
-  , logBody     :: Maybe (Status -> Builder -> Value)
+  -- | An optional constructor of the response body log value.
+  --
+  -- Logging response body involves extracting it from @Response@ via IO operations,
+  -- therefore the function takes @Request@, @Status@ and @ResponseHeaders@
+  -- as arguments to decide whether the IO operations of body extraction have
+  -- to be permormed.
+  -- The resulting @Maybe@ function is the constructor of a loggable @Value@
+  -- from the body bytestring builder.
+  , logBody :: Maybe (Request -> Status -> ResponseHeaders -> Maybe (Builder -> Value))
   }
 
 -- | Timing data
