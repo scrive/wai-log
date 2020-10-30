@@ -2,9 +2,10 @@
 
 * Rename `mkApplicationLogger` into `mkLogMiddleware`
 * Generate ID for each request to correlate log messages
-* Remove optional `logSendingResponse`, which means always logging `Sending response`
-* Log `method` and `url` in `Request complete` too
-* Log `response_body` on 4xx and 5xx
+* Remove optional `logSendingResponse` and always log `Sending response`
+* Log `method` and `url` in `defaultLogResponse` too
+* Add `logBody` option to log `response_body` depending on the request and
+  response parameters
 
 # wai-log-0.2 (2020-04-14)
 
