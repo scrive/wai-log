@@ -1,6 +1,6 @@
 cabal-version:       2.0
 name:                wai-log
-version:             0.2.0.0
+version:             0.3.0.0
 
 synopsis:            A logging middleware for WAI applications
 
@@ -24,7 +24,7 @@ license-file:        LICENSE
 build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
 tested-with:         GHC ==7.10.3, GHC ==8.0.2, GHC ==8.2.2, GHC ==8.4.4,
-                     GHC ==8.6.5, GHC ==8.8.3
+                     GHC ==8.6.5, GHC ==8.8.4
 
 Source-repository head
   Type:     git
@@ -38,12 +38,14 @@ library
                      , FlexibleContexts
   build-depends:       base >=4.8 && <5
                      , aeson
+                     , bytestring
                      , http-types
                      , log-base
                      , string-conversions
                      , text
                      , time
+                     , uuid
                      , wai
   exposed-modules:     Network.Wai.Log
-                     , Network.Wai.Log.Options
+  other-modules:       Network.Wai.Log.Options
                      , Network.Wai.Log.Internal

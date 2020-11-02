@@ -6,22 +6,36 @@ module Network.Wai.Log.Options (
 , defaultOptions
 , defaultLogRequest
 , defaultLogResponse
+-- * Helpers
+, logRequestUUID
+, requestUUID
 ) where
 
-import Data.Aeson.Types (Pair)
+import Data.Aeson.Types (Pair, Value)
+import Data.ByteString.Builder (Builder)
 import Data.String.Conversions (ConvertibleStrings, StrictText, cs)
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
+import Data.UUID (UUID)
 import Log
-import Network.HTTP.Types.Status
+import Network.HTTP.Types.Header (ResponseHeaders)
+import Network.HTTP.Types.Status (Status, statusCode, statusMessage)
 import Network.Wai
 
 -- | Logging options
+--
+-- Logging response body involves extracting it from @Response@ via IO operations,
+-- therefore the @logBody@ option takes @Request@, @Status@ and @ResponseHeaders@
+-- as arguments to decide whether the IO operations of body extraction have
+-- to be permormed.
+-- The resulting @Maybe@ function is the constructor of a loggable @Value@
+-- from the body bytestring builder.
 data Options = Options {
-    logLevel            :: LogLevel
-  , logRequest          :: Request -> [Pair]
-  , logSendingResponse  :: Bool
-  , logResponse         :: Request -> Response -> ResponseTime -> [Pair]
+    logLevel    :: LogLevel
+  , logRequest  :: UUID -> Request -> [Pair]
+  , logResponse :: UUID -> Request -> Response -> Value -> ResponseTime -> [Pair]
+  -- | An optional constructor of the response body log value.
+  , logBody :: Maybe (Request -> Status -> ResponseHeaders -> Maybe (Builder -> Value))
   }
 
 -- | Timing data
@@ -37,7 +51,6 @@ data ResponseTime = ResponseTime {
 -- @
 -- { logLevel = 'LogInfo'
 -- , logRequest = 'defaultLogRequest'
--- , logSendingResponse = True
 -- , logResponse = 'defaultLogResponse'
 -- }
 -- @
@@ -45,45 +58,65 @@ defaultOptions :: Options
 defaultOptions = Options
   { logLevel = LogInfo
   , logRequest = defaultLogRequest
-  , logSendingResponse = True
   , logResponse = defaultLogResponse
+  , logBody = Nothing
   }
 
 -- | Logs the following request values:
 --
+-- * request_uuid
 -- * method
 -- * url path
 -- * remote host
 -- * user agent
 -- * body-length
-defaultLogRequest :: Request -> [Pair]
-defaultLogRequest req =
-  [ "method"      .= ts (requestMethod req)
-  , "url"         .= ts (rawPathInfo req)
-  , "remote-host" .= show (remoteHost req)
-  , "user-agent"  .= fmap ts (requestHeaderUserAgent req)
-  , "body-length" .= show (requestBodyLength req)
+defaultLogRequest :: UUID -> Request -> [Pair]
+defaultLogRequest uuid req =
+  [ "request_uuid" .= uuid
+  , "method"       .= ts (requestMethod req)
+  , "url"          .= ts (rawPathInfo req)
+  , "remote_host"  .= show (remoteHost req)
+  , "user_agent"   .= fmap ts (requestHeaderUserAgent req)
+  , "body_length"  .= show (requestBodyLength req)
   ]
 
 -- | Logs the following values:
 --
+-- * request_uuid
+-- * request method
+-- * request url path
+-- * response_body details provided as 'Value'
 -- * status code
 -- * status message
 -- * time full
 -- * time processing
 --
--- Nothing from the 'Request' is logged
---
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
-defaultLogResponse :: Request -> Response -> ResponseTime -> [Pair]
-defaultLogResponse _req resp time =
-    [ "status" .= object [ "code"    .= statusCode (responseStatus resp)
+defaultLogResponse :: UUID -> Request -> Response -> Value -> ResponseTime -> [Pair]
+defaultLogResponse uuid req resp responseBody time =
+    [ "request_uuid"  .= uuid
+    , "method"        .= ts (requestMethod req)
+    , "url"           .= ts (rawPathInfo req)
+    , "response_body" .= responseBody
+    , "status" .= object [ "code"    .= statusCode (responseStatus resp)
                          , "message" .= ts (statusMessage (responseStatus resp))
                          ]
     , "time"   .= object [ "full"    .= full time
                          , "process" .= processing time
                          ]
     ]
+
+-- | Helper to consistently log the UUID in your application by adding
+-- @request_uuid@ field to log's 'localData'
+logRequestUUID :: MonadLog m => UUID -> m a -> m a
+logRequestUUID = localData . requestUUID
+
+-- | Logs the following values:
+--
+-- * request_uuid
+requestUUID :: UUID -> [Pair]
+requestUUID uuid =
+  [ "request_uuid" .= uuid ]
 
 ts :: ConvertibleStrings a StrictText => a -> Text
 ts = cs

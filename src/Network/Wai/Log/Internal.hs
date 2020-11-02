@@ -1,39 +1,56 @@
 {-# LANGUAGE RecordWildCards #-}
 module Network.Wai.Log.Internal where
 
-import Control.Monad (when)
-import Data.Aeson.Types (Value, object, emptyObject)
+import Data.Aeson.Types (Value(..), object)
+import Data.ByteString.Builder (Builder)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
+import Data.UUID (UUID)
+import Data.UUID.V4 (nextRandom)
 import Log (LogLevel)
-import Network.Wai (Middleware)
+import Network.Wai (Application, responseToStream)
 
-import Network.Wai.Log.Options (Options(..), ResponseTime(..))
+import Network.Wai.Log.Options (Options(..), ResponseTime(..), requestUUID)
 
 -- | This type matches the one returned by 'getLoggerIO'
 type LoggerIO = UTCTime -> LogLevel -> Text -> Value -> IO ()
 
--- | Create a logging 'Middleware' given a 'LoggerIO' logging function and 'Options'
-logRequestsWith :: LoggerIO -> Options -> Middleware
-logRequestsWith loggerIO Options{..} app req respond = do
-  logIO "Request received" . object . logRequest $ req
+-- | Create a logging 'Middleware' that takes request UUID
+-- given a 'LoggerIO' logging function and 'Options'
+logRequestsWith :: LoggerIO -> Options -> (UUID -> Application) -> Application
+logRequestsWith loggerIO Options{..} mkApp req respond = do
+  uuid <- nextRandom
+  logIO "Request received" $ logRequest uuid req
   tStart <- getCurrentTime
-  app req $ \resp -> do
+  mkApp uuid req $ \resp -> do
     tEnd <- getCurrentTime
-    when logSendingResponse $
-         logIO_ "Sending response"
+    logIO "Sending response" . requestUUID $ uuid
     r <- respond resp
     tFull <- getCurrentTime
     let processing = diffUTCTime tEnd  tStart
         full       = diffUTCTime tFull tStart
         times      = ResponseTime{..}
-    logIO "Request complete" . object $ logResponse req resp times
+
+    _ <- case logBody of
+      Nothing ->
+        logIO "Request complete" $ logResponse uuid req resp Null times
+      Just bodyLogValueConstructorFunction ->
+        let (status, responseHeaders, bodyToIO) = responseToStream resp
+            mBodyLogValueConstructor =
+              bodyLogValueConstructorFunction req status responseHeaders
+        in case mBodyLogValueConstructor of
+          Nothing ->
+            logIO "Request complete" $ logResponse uuid req resp Null times
+          Just bodyLogValueConstructor ->
+            bodyToIO $ \streamingBodyToIO ->
+              let logWithBuilder :: Builder -> IO ()
+                  logWithBuilder b = logIO "Request complete" $
+                    logResponse uuid req resp (bodyLogValueConstructor b) times
+
+              in streamingBodyToIO logWithBuilder (return ())
     return r
 
   where
-
-    logIO message value = do
+    logIO message pairs = do
       now <- getCurrentTime
-      loggerIO now logLevel message value
-
-    logIO_ m = logIO m emptyObject
+      loggerIO now logLevel message (object pairs)
