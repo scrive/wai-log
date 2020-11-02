@@ -7,7 +7,7 @@
 -- 2020-10-27 12:30:23 INFO eid-server: Request received {
 --   "url": "\/api\/v1\/transaction\/new",
 --   "body-length": "KnownLength 136",
---   "method": "POST",
+--   "method": \"POST\",
 --   "user-agent": "curl/7.68.0",
 --   "request_uuid": "f2c89425-9ec4-4cd2-ae56-4bab23681fce",
 --   "remote-host": "127.0.0.1:34694"
@@ -18,7 +18,7 @@
 -- 2020-10-27 12:30:23 INFO eid-server: Request complete {
 --   "response_body": null,
 --   "url": "\/api\/v1\/transaction\/new",
---   "method": "POST",
+--   "method": \"POST\",
 --   "status": {
 --     "code": 400,
 --     "message": "Bad Request"
@@ -64,7 +64,7 @@ type LogMiddleware = (UUID -> Application) -> Application
 
 -- | Create a 'LogMiddleware' using 'defaultOptions'
 --
--- Use 'mkApplicationLoggerWith' for custom 'Options'
+-- Use 'mkLogMiddlewareWith' for custom 'Options'
 mkLogMiddleware :: MonadLog m => m LogMiddleware
 mkLogMiddleware = mkLogMiddlewareWith defaultOptions
 
