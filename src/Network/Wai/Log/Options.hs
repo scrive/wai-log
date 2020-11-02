@@ -73,9 +73,9 @@ defaultLogRequest uuid req =
   [ "request_uuid" .= uuid
   , "method"       .= ts (requestMethod req)
   , "url"          .= ts (rawPathInfo req)
-  , "remote-host"  .= show (remoteHost req)
-  , "user-agent"   .= fmap ts (requestHeaderUserAgent req)
-  , "body-length"  .= show (requestBodyLength req)
+  , "remote_host"  .= show (remoteHost req)
+  , "user_agent"   .= fmap ts (requestHeaderUserAgent req)
+  , "body_length"  .= show (requestBodyLength req)
   ]
 
 -- | Logs the following values:

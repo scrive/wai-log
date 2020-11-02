@@ -6,6 +6,7 @@
 * Log `method` and `url` in `defaultLogResponse` too
 * Add `logBody` option to log `response_body` depending on the request and
   response parameters
+* Use `snake_case` consistently in log output fields for `defaultOptions`
 
 # wai-log-0.2 (2020-04-14)
 

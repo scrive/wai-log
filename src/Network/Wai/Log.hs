@@ -6,11 +6,11 @@
 -- @
 -- 2020-10-27 12:30:23 INFO eid-server: Request received {
 --   "url": "\/api\/v1\/transaction\/new",
---   "body-length": "KnownLength 136",
+--   "body_length": "KnownLength 136",
 --   "method": \"POST\",
---   "user-agent": "curl/7.68.0",
+--   "user_agent": "curl/7.68.0",
 --   "request_uuid": "f2c89425-9ec4-4cd2-ae56-4bab23681fce",
---   "remote-host": "127.0.0.1:34694"
+--   "remote_host": "127.0.0.1:34694"
 -- }
 -- 2020-10-27 12:30:23 INFO eid-server: Sending response {
 --   "request_uuid": "f2c89425-9ec4-4cd2-ae56-4bab23681fce"
