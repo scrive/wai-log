@@ -2,11 +2,13 @@ module Network.Wai.Log.Options (
 -- * Options & Timing
   Options(..)
 , ResponseTime(..)
-, logRequestUUID
 -- * Defaults
 , defaultOptions
 , defaultLogRequest
 , defaultLogResponse
+-- * Helpers
+, logRequestUUID
+, requestUUID
 ) where
 
 import Data.Aeson.Types (Pair, Value)
@@ -81,13 +83,6 @@ defaultLogRequest uuid req =
 -- | Logs the following values:
 --
 -- * request_uuid
-logRequestUUID :: UUID -> [Pair]
-logRequestUUID uuid =
-  [ "request_uuid" .= uuid ]
-
--- | Logs the following values:
---
--- * request_uuid
 -- * request method
 -- * request url path
 -- * response_body details provided as 'Value'
@@ -110,6 +105,18 @@ defaultLogResponse uuid req resp responseBody time =
                          , "process" .= processing time
                          ]
     ]
+
+-- | Helper to consistently log the UUID in your application by adding
+-- @request_uuid@ field to log's 'localData'
+logRequestUUID :: MonadLog m => UUID -> m a -> m a
+logRequestUUID = localData . requestUUID
+
+-- | Logs the following values:
+--
+-- * request_uuid
+requestUUID :: UUID -> [Pair]
+requestUUID uuid =
+  [ "request_uuid" .= uuid ]
 
 ts :: ConvertibleStrings a StrictText => a -> Text
 ts = cs

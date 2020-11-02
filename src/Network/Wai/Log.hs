@@ -43,6 +43,8 @@ module Network.Wai.Log (
 , defaultOptions
 , defaultLogRequest
 , defaultLogResponse
+-- ** Helpers
+, logRequestUUID
 ) where
 
 import Prelude hiding (log)

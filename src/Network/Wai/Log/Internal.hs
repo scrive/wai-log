@@ -10,7 +10,7 @@ import Data.UUID.V4 (nextRandom)
 import Log (LogLevel)
 import Network.Wai (Application, responseToStream)
 
-import Network.Wai.Log.Options (Options(..), ResponseTime(..), logRequestUUID)
+import Network.Wai.Log.Options (Options(..), ResponseTime(..), requestUUID)
 
 -- | This type matches the one returned by 'getLoggerIO'
 type LoggerIO = UTCTime -> LogLevel -> Text -> Value -> IO ()
@@ -24,7 +24,7 @@ logRequestsWith loggerIO Options{..} mkApp req respond = do
   tStart <- getCurrentTime
   mkApp uuid req $ \resp -> do
     tEnd <- getCurrentTime
-    logIO "Sending response" . logRequestUUID $ uuid
+    logIO "Sending response" . requestUUID $ uuid
     r <- respond resp
     tFull <- getCurrentTime
     let processing = diffUTCTime tEnd  tStart
