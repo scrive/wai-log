@@ -2,7 +2,7 @@ module Network.Wai.Log.Options (
 -- * Options & Timing
   Options(..)
 , ResponseTime(..)
-, logSendingResponse
+, logRequestUUID
 -- * Defaults
 , defaultOptions
 , defaultLogRequest
@@ -81,8 +81,8 @@ defaultLogRequest uuid req =
 -- | Logs the following values:
 --
 -- * request_uuid
-logSendingResponse :: UUID -> [Pair]
-logSendingResponse uuid =
+logRequestUUID :: UUID -> [Pair]
+logRequestUUID uuid =
   [ "request_uuid" .= uuid ]
 
 -- | Logs the following values:
