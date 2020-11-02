@@ -1,4 +1,4 @@
-# wai-log-0.3 (not released)
+# wai-log-0.3 (2020-11-02)
 
 * Rename `mkApplicationLogger` into `mkLogMiddleware`
 * Generate ID for each request to correlate log messages
