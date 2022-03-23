@@ -111,17 +111,15 @@ defaultLogRequest reqId req =
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
 defaultLogResponse :: ToJSON id => id -> Request -> Response -> Value -> ResponseTime -> [Pair]
 defaultLogResponse reqId req resp responseBody time =
-    [ "request_id"    .= reqId
-    , "method"        .= ts (requestMethod req)
-    , "url"           .= ts (rawPathInfo req)
-    , "response_body" .= responseBody
-    , "status" .= object [ "code"    .= statusCode (responseStatus resp)
-                         , "message" .= ts (statusMessage (responseStatus resp))
-                         ]
-    , "time"   .= object [ "full"    .= full time
-                         , "process" .= processing time
-                         ]
-    ]
+  [ "request_id" .= reqId
+  , "method" .= ts (requestMethod req)
+  , "url" .= ts (rawPathInfo req)
+  , "response_body" .= responseBody
+  , "response_code" .= statusCode (responseStatus resp)
+  , "response_message" .= ts (statusMessage $ responseStatus resp)
+  , "full_time" .= full time
+  , "elapsed_time" .= processing time
+  ]
 
 -- | Helper to consistently log the request id in your application by adding
 -- @request_id@ field to log's 'localData'
