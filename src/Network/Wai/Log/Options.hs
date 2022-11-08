@@ -7,16 +7,18 @@ module Network.Wai.Log.Options (
 , defaultLogRequest
 , defaultLogResponse
 -- * Helpers
-, logRequestUUID
-, requestUUID
+, mkOpaqueDefaultOptions
+, logRequestId
+, requestId
 ) where
 
-import Data.Aeson.Types (Pair, Value)
+import Data.Aeson.Types (ToJSON, Pair, Value)
 import Data.ByteString.Builder (Builder)
 import Data.String.Conversions (ConvertibleStrings, StrictText, cs)
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
 import Data.UUID (UUID)
+import Data.UUID.V4 (nextRandom)
 import Log
 import Network.HTTP.Types.Header (ResponseHeaders)
 import Network.HTTP.Types.Status (Status, statusCode, statusMessage)
@@ -27,15 +29,17 @@ import Network.Wai
 -- Logging response body involves extracting it from @Response@ via IO operations,
 -- therefore the @logBody@ option takes @Request@, @Status@ and @ResponseHeaders@
 -- as arguments to decide whether the IO operations of body extraction have
--- to be permormed.
+-- to be performed.
 -- The resulting @Maybe@ function is the constructor of a loggable @Value@
 -- from the body bytestring builder.
-data Options = Options {
+data Options id = Options {
     logLevel    :: LogLevel
-  , logRequest  :: UUID -> Request -> [Pair]
-  , logResponse :: UUID -> Request -> Response -> Value -> ResponseTime -> [Pair]
+  , logRequest  :: id -> Request -> [Pair]
+  , logResponse :: id -> Request -> Response -> Value -> ResponseTime -> [Pair]
   -- | An optional constructor of the response body log value.
   , logBody :: Maybe (Request -> Status -> ResponseHeaders -> Maybe (Builder -> Value))
+  -- | A function for getting the request id
+  , logGetRequestId :: Request -> IO id
   }
 
 -- | Timing data
@@ -52,14 +56,27 @@ data ResponseTime = ResponseTime {
 -- { logLevel = 'LogInfo'
 -- , logRequest = 'defaultLogRequest'
 -- , logResponse = 'defaultLogResponse'
+-- , logGetRequestId = 'const nextRandom'
 -- }
 -- @
-defaultOptions :: Options
+defaultOptions :: Options UUID
 defaultOptions = Options
   { logLevel = LogInfo
   , logRequest = defaultLogRequest
   , logResponse = defaultLogResponse
   , logBody = Nothing
+  , logGetRequestId = const nextRandom
+  }
+
+-- | Build a default 'Options' record for an opaque id given a function
+-- for retrieving an id.
+mkOpaqueDefaultOptions :: ToJSON id => (Request -> IO id) -> Options id
+mkOpaqueDefaultOptions getReqId = Options
+  { logLevel = LogInfo
+  , logRequest = defaultLogRequest
+  , logResponse = defaultLogResponse
+  , logBody = Nothing
+  , logGetRequestId = getReqId
   }
 
 -- | Logs the following request values:
@@ -70,9 +87,9 @@ defaultOptions = Options
 -- * remote host
 -- * user agent
 -- * body-length
-defaultLogRequest :: UUID -> Request -> [Pair]
-defaultLogRequest uuid req =
-  [ "request_uuid" .= uuid
+defaultLogRequest :: ToJSON id => id -> Request -> [Pair]
+defaultLogRequest reqId req =
+  [ "request_id"   .= reqId
   , "method"       .= ts (requestMethod req)
   , "url"          .= ts (rawPathInfo req)
   , "remote_host"  .= show (remoteHost req)
@@ -82,7 +99,7 @@ defaultLogRequest uuid req =
 
 -- | Logs the following values:
 --
--- * request_uuid
+-- * request_id
 -- * request method
 -- * request url path
 -- * response_body details provided as 'Value'
@@ -92,9 +109,9 @@ defaultLogRequest uuid req =
 -- * time processing
 --
 -- Time is in seconds as that is how 'NominalDiffTime' is treated by default
-defaultLogResponse :: UUID -> Request -> Response -> Value -> ResponseTime -> [Pair]
-defaultLogResponse uuid req resp responseBody time =
-    [ "request_uuid"  .= uuid
+defaultLogResponse :: ToJSON id => id -> Request -> Response -> Value -> ResponseTime -> [Pair]
+defaultLogResponse reqId req resp responseBody time =
+    [ "request_id"    .= reqId
     , "method"        .= ts (requestMethod req)
     , "url"           .= ts (rawPathInfo req)
     , "response_body" .= responseBody
@@ -106,17 +123,17 @@ defaultLogResponse uuid req resp responseBody time =
                          ]
     ]
 
--- | Helper to consistently log the UUID in your application by adding
--- @request_uuid@ field to log's 'localData'
-logRequestUUID :: MonadLog m => UUID -> m a -> m a
-logRequestUUID = localData . requestUUID
+-- | Helper to consistently log the request id in your application by adding
+-- @request_id@ field to log's 'localData'
+logRequestId :: (MonadLog m, ToJSON id) => id -> m a -> m a
+logRequestId = localData . requestId
 
 -- | Logs the following values:
 --
--- * request_uuid
-requestUUID :: UUID -> [Pair]
-requestUUID uuid =
-  [ "request_uuid" .= uuid ]
+-- * request_id
+requestId :: ToJSON id => id -> [Pair]
+requestId reqId =
+  [ "request_id" .= reqId ]
 
 ts :: ConvertibleStrings a StrictText => a -> Text
 ts = cs
