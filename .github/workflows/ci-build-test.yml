@@ -13,31 +13,23 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         ghc:
-          - '7.10.3'
-          - '8.0.2'
-          - '8.2.2'
-          - '8.4.4'
-          - '8.6.5'
-          - '8.8.4'
+          - '8.10.7'
+          - '9.2.4'
         experimental: [false]
-        include:
-          - os: ubuntu-latest
-            ghc: '8.10'
-            experimental: true
 
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
     name: GHC ${{ matrix.ghc }}
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-haskell@v1
+    - uses: actions/checkout@v3
+    - uses: haskell/actions/setup@v2
       with:
         ghc-version: ${{ matrix.ghc }}
-        cabal-version: '3.0'
+        cabal-version: 'latest'
 
     - name: Cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-cabal
       with:
