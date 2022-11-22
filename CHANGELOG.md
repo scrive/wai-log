@@ -1,3 +1,11 @@
+# wai-log-0.4 (2022-11-22)
+* Parametrise the `LogMiddleware` type with an opaque type parameter for the request id
+* Parametrise the `Options` record type with the opaque type parameter representing the request id
+* Add new field to the `Options id` record type `logGetRequestId :: Request -> IO id` which represents a function for getting/generating a request id given a `Request`
+* Update helper functions `logRequestId` and `requestId` to reflect changes to the request id type
+* Add new helper function `mkOpaqueDefaultOptions` for building an `Options id` record for an opaque id
+* Flatten the field structure of the log response emitted by `defaultLogResponse`
+
 # wai-log-0.3 (2020-11-02)
 
 * Rename `mkApplicationLogger` into `mkLogMiddleware`
