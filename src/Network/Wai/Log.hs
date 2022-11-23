@@ -43,6 +43,7 @@ module Network.Wai.Log (
 , defaultOptions
 , defaultLogRequest
 , defaultLogResponse
+, mkOpaqueDefaultOptions
 -- ** Helpers
 , logRequestId
 ) where
