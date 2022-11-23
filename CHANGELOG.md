@@ -1,3 +1,6 @@
+# wai-log-0.4.0.1 (2022-11-23)
+* Export `mkOpaqueDefaultOptions` helper function
+
 # wai-log-0.4 (2022-11-22)
 * Parametrise the `LogMiddleware` type with an opaque type parameter for the request id
 * Parametrise the `Options` record type with the opaque type parameter representing the request id
