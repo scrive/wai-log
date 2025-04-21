@@ -8,7 +8,7 @@ import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import Log (LogLevel)
 import Network.Wai (Application, responseToStream)
 
-import Network.Wai.Log.Options (Options(..), ResponseTime(..), requestId)
+import Network.Wai.Log.Options (Options(..), ResponseTime(..))
 
 -- | This type matches the one returned by 'getLoggerIO'
 type LoggerIO = UTCTime -> LogLevel -> Text -> Value -> IO ()
@@ -22,7 +22,7 @@ logRequestsWith loggerIO Options{..} mkApp req respond = do
   tStart <- getCurrentTime
   mkApp reqId req $ \resp -> do
     tEnd <- getCurrentTime
-    logIO "Sending response" . requestId $ reqId
+    logIO "Sending response" $ logResponseSending reqId req
     r <- respond resp
     tFull <- getCurrentTime
     let processing = diffUTCTime tEnd  tStart
