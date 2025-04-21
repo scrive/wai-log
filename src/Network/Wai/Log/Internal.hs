@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Network.Wai.Log.Internal where
 
-import Data.Aeson.Types (ToJSON, Value(..), object)
+import Data.Aeson.Types (Value(..), object)
 import Data.ByteString.Builder (Builder)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
@@ -15,7 +15,7 @@ type LoggerIO = UTCTime -> LogLevel -> Text -> Value -> IO ()
 
 -- | Create a logging 'Middleware' that takes request id
 -- given a 'LoggerIO' logging function and 'Options'
-logRequestsWith :: ToJSON id => LoggerIO -> Options id -> (id -> Application) -> Application
+logRequestsWith :: LoggerIO -> Options id -> (id -> Application) -> Application
 logRequestsWith loggerIO Options{..} mkApp req respond = do
   reqId <- logGetRequestId req
   logIO "Request received" $ logRequest reqId req
