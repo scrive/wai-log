@@ -36,6 +36,7 @@ data Options id = Options {
     logLevel    :: LogLevel
   , logRequest  :: id -> Request -> [Pair]
   , logResponse :: id -> Request -> Response -> Value -> ResponseTime -> [Pair]
+  -- | Build the log line printed before HTTP response is sent
   , logResponseSending :: id -> Request -> [Pair]
   -- | An optional constructor of the response body log value.
   , logBody :: Maybe (Request -> Status -> ResponseHeaders -> Maybe (Builder -> Value))

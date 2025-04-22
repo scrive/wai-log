@@ -50,7 +50,6 @@ module Network.Wai.Log (
 
 import Prelude hiding (log)
 
-import Data.Aeson (ToJSON)
 import Data.UUID (UUID)
 import Log (MonadLog, getLoggerIO)
 import Network.Wai
@@ -73,7 +72,7 @@ mkLogMiddleware :: MonadLog m => m (LogMiddleware UUID)
 mkLogMiddleware = mkLogMiddlewareWith defaultOptions
 
 -- | Create a 'LogMiddleware' using the supplied 'Options'
-mkLogMiddlewareWith :: (MonadLog m, ToJSON id) => Options id -> m (LogMiddleware id)
+mkLogMiddlewareWith :: (MonadLog m) => Options id -> m (LogMiddleware id)
 mkLogMiddlewareWith options = do
   loggerIO <- getLoggerIO
   return $ logRequestsWith loggerIO options
