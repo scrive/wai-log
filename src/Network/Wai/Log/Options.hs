@@ -128,7 +128,6 @@ defaultLogResponse reqId req resp responseBody time =
 defaultLogResponseSending :: (ToJSON id) => id -> Request -> [Pair]
 defaultLogResponseSending reqId _req = requestId reqId
 
-
 -- | Helper to consistently log the request id in your application by adding
 -- @request_id@ field to log's 'localData'
 logRequestId :: (MonadLog m, ToJSON id) => id -> m a -> m a
