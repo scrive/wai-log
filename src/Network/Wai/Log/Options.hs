@@ -36,6 +36,8 @@ data Options id = Options {
     logLevel    :: LogLevel
   , logRequest  :: id -> Request -> [Pair]
   , logResponse :: id -> Request -> Response -> Value -> ResponseTime -> [Pair]
+  -- | Build the log line printed before HTTP response is sent
+  , logResponseSending :: id -> Request -> [Pair]
   -- | An optional constructor of the response body log value.
   , logBody :: Maybe (Request -> Status -> ResponseHeaders -> Maybe (Builder -> Value))
   -- | A function for getting the request id
@@ -64,6 +66,7 @@ defaultOptions = Options
   { logLevel = LogInfo
   , logRequest = defaultLogRequest
   , logResponse = defaultLogResponse
+  , logResponseSending = defaultLogResponseSending
   , logBody = Nothing
   , logGetRequestId = const nextRandom
   }
@@ -75,6 +78,7 @@ mkOpaqueDefaultOptions getReqId = Options
   { logLevel = LogInfo
   , logRequest = defaultLogRequest
   , logResponse = defaultLogResponse
+  , logResponseSending = defaultLogResponseSending
   , logBody = Nothing
   , logGetRequestId = getReqId
   }
@@ -120,6 +124,10 @@ defaultLogResponse reqId req resp responseBody time =
   , "full_time" .= full time
   , "elapsed_time" .= processing time
   ]
+
+-- | Just logs the request id
+defaultLogResponseSending :: (ToJSON id) => id -> Request -> [Pair]
+defaultLogResponseSending reqId _req = requestId reqId
 
 -- | Helper to consistently log the request id in your application by adding
 -- @request_id@ field to log's 'localData'
