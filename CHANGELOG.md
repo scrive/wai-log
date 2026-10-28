@@ -1,3 +1,8 @@
+# wai-log-0.5.0.0 (2026-10-28)
+* Add `logResponseSending` field to `Options` to configure the "Sending response" log line
+* Add `defaultLogResponseSending`, used by `defaultOptions` and `mkOpaqueDefaultOptions`
+* Drop the `ToJSON id` constraint from `mkLogMiddlewareWith`
+
 # wai-log-0.4.0.1 (2022-11-23)
 * Export `mkOpaqueDefaultOptions` helper function
 
