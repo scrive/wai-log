@@ -6,6 +6,7 @@ module Network.Wai.Log.Options (
 , defaultOptions
 , defaultLogRequest
 , defaultLogResponse
+, defaultLogResponseSending
 -- * Helpers
 , mkOpaqueDefaultOptions
 , logRequestId

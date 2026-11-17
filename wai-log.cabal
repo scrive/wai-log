@@ -1,6 +1,6 @@
 cabal-version:       2.0
 name:                wai-log
-version:             0.4.0.1
+version:             0.5.0.0
 
 synopsis:            A logging middleware for WAI applications
 
